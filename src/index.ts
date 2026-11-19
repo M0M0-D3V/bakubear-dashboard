@@ -1,11 +1,11 @@
-import type { BakubearEvent } from "./types";
+import { readFileSync } from "node:fs";
+import type { BakubearEvent } from "./types.js";
 
-const events: BakubearEvent[] = [
-  { id: 1, type: "squeeze", timestamp: "2026-11-17T20:00:00Z" },
-  { id: 2, type: "message", timestamp: "2026-11-17T20:05:00Z", text: "hi bear" },
-  { id: 3, type: "squeeze", timestamp: "2026-11-17T20:10:00Z" },
-  { id: 4, type: "message", timestamp: "2026-11-17T20:15:00Z", text: "goodnight" },
-];
+const raw = readFileSync("data/events.jsonl", "utf-8");
+const events: BakubearEvent[] = raw
+  .split("\n")
+  .filter((line) => line.trim() !== "")
+  .map((line) => JSON.parse(line) as BakubearEvent);
 
 function summarize(events: BakubearEvent[]): { squeezes: number; messages: number } {
   const squeezes = events.filter((e) => e.type === "squeeze").length;
