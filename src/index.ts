@@ -2,10 +2,15 @@ import { readFileSync } from "node:fs";
 import type { BakubearEvent, FeedItem } from "./types.js";
 
 const raw = readFileSync("data/events.jsonl", "utf-8");
-const events: BakubearEvent[] = raw
-  .split("\n")
-  .filter((line) => line.trim() !== "")
-  .map((line) => JSON.parse(line) as BakubearEvent);
+const events: BakubearEvent[] = [];
+for (const line of raw.split("\n")) {
+  if (line.trim() === "") continue;
+  try {
+    events.push(JSON.parse(line) as BakubearEvent);
+  } catch {
+    console.warn("Skipping bad line:", line);
+  }
+}
 
 function summarize(events: BakubearEvent[]): { squeezes: number; messages: number } {
   const squeezes = events.filter((e) => e.type === "squeeze").length;
