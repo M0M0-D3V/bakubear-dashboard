@@ -13,14 +13,8 @@ function summarize(events: BakubearEvent[]): { squeezes: number; messages: numbe
   return { squeezes, messages };
 }
 
-console.log(summarize(events));
-
-for (const e of events) {
-  if (e.type === "message") {
-    console.log(`[${e.timestamp}] message: ${e.text}`);
-  } else {
-    console.log(`[${e.timestamp}] squeeze`);
-  }
+function toEvent(item: FeedItem, id: number): BakubearEvent {
+  return { id, type: "message", timestamp: item.created_at, text: item.value };
 }
 
 async function fetchMessages(): Promise<FeedItem[]> {
@@ -32,4 +26,16 @@ async function fetchMessages(): Promise<FeedItem[]> {
 }
 
 const items = await fetchMessages();
-for (const item of items) console.log(`[${item.created_at}] ${item.value}`);
+const liveEvents = items.map((item, i) => toEvent(item, events.length + i + 1));
+const allEvents = [...events, ...liveEvents];
+allEvents.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+
+console.log(summarize(allEvents));
+
+for (const e of allEvents) {
+  if (e.type === "message") {
+    console.log(`[${e.timestamp}] message: ${e.text}`);
+  } else {
+    console.log(`[${e.timestamp}] squeeze`);
+  }
+}
