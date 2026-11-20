@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import type { BakubearEvent } from "./types.js";
+import type { BakubearEvent, FeedItem } from "./types.js";
 
 const raw = readFileSync("data/events.jsonl", "utf-8");
 const events: BakubearEvent[] = raw
@@ -22,3 +22,14 @@ for (const e of events) {
     console.log(`[${e.timestamp}] squeeze`);
   }
 }
+
+async function fetchMessages(): Promise<FeedItem[]> {
+  const url = `https://io.adafruit.com/api/v2/${process.env.ADAFRUIT_IO_USERNAME}/feeds/bakubear-messages/data?limit=5`;
+  const response = await fetch(url, { headers: { "X-AIO-Key": process.env.ADAFRUIT_IO_KEY ?? "" } });
+  if (!response.ok) throw new Error(`Adafruit error: ${response.status}`);
+  const items: FeedItem[] = await response.json();
+  return items;
+}
+
+const items = await fetchMessages();
+for (const item of items) console.log(`[${item.created_at}] ${item.value}`);

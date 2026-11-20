@@ -6,3 +6,5 @@ export interface BakubearEvent {
   timestamp: string;
   text?: string;
 }
+
+export interface FeedItem { id: string; value: string; created_at: string; }
