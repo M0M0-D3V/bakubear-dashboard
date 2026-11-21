@@ -1,3 +1,4 @@
+import express from "express";
 import { readFileSync } from "node:fs";
 import type { BakubearEvent, FeedItem } from "./types.js";
 
@@ -30,17 +31,24 @@ async function fetchMessages(): Promise<FeedItem[]> {
   return items;
 }
 
-const items = await fetchMessages();
-const liveEvents = items.map((item, i) => toEvent(item, events.length + i + 1));
-const allEvents = [...events, ...liveEvents];
-allEvents.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-
-console.log(summarize(allEvents));
-
-for (const e of allEvents) {
-  if (e.type === "message") {
-    console.log(`[${e.timestamp}] message: ${e.text}`);
-  } else {
-    console.log(`[${e.timestamp}] squeeze`);
-  }
+async function getTimeline(): Promise<BakubearEvent[]> {
+  const items = await fetchMessages();
+  const liveEvents = items.map((item, i) => toEvent(item, events.length + i + 1));
+  const allEvents = [...events, ...liveEvents];
+  allEvents.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+  return allEvents;
 }
+
+const app = express();
+const PORT = 3000;
+app.get("/api/events", async (req, res) => {
+  try {
+    res.json(await getTimeline());
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not load events" });
+  }
+  });
+  app.listen(PORT, () => {
+    console.log(`Bakubear dashboard on http://localhost:${PORT}`);
+});
