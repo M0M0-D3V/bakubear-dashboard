@@ -24,7 +24,7 @@ function toEvent(item: FeedItem, id: number): BakubearEvent {
 }
 
 async function fetchMessages(): Promise<FeedItem[]> {
-  const url = `https://io.adafruit.com/api/v2/${process.env.ADAFRUIT_IO_USERNAME}/feeds/bakubear-messages/data?limit=5`;
+  const url = `https://io.adafruit.com/api/v2/${process.env.ADAFRUIT_IO_USERNAME}/feeds/bakubear-messages/data?limit=50`;
   const response = await fetch(url, { headers: { "X-AIO-Key": process.env.ADAFRUIT_IO_KEY ?? "" } });
   if (!response.ok) throw new Error(`Adafruit error: ${response.status}`);
   const items: FeedItem[] = await response.json();
@@ -35,7 +35,7 @@ async function getTimeline(): Promise<BakubearEvent[]> {
   const items = await fetchMessages();
   const liveEvents = items.map((item, i) => toEvent(item, events.length + i + 1));
   const allEvents = [...events, ...liveEvents];
-  allEvents.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+  allEvents.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
   return allEvents;
 }
 
