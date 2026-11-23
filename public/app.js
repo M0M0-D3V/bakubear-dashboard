@@ -2,6 +2,7 @@ async function loadEvents() {
   const response = await fetch("/api/events");
   const events = await response.json();
   const ul = document.getElementById("timeline");
+  ul.innerHTML = "";
 
   for (const event of events) {
     const li = document.createElement("li");
@@ -18,3 +19,4 @@ async function loadEvents() {
 }
 
 loadEvents();
+setInterval(loadEvents, 10000);
