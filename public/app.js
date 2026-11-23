@@ -8,6 +8,13 @@ async function loadEvents() {
     li.textContent = `[${event.timestamp}] ${event.type} ${event.text ?? ""}`;
     ul.appendChild(li);
   }
+  const squeezeCount = events.filter(
+    (e) => e.type === "message" || e.type === "squeeze",
+  ).length;
+  const lastMessage =
+    events.find((e) => e.type === "message")?.text ?? "No messages yet";
+  document.getElementById("stats").textContent =
+    `Squeeze Events: ${squeezeCount} -- Last Message: ${lastMessage}`;
 }
 
 loadEvents();
